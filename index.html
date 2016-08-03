@@ -1,53 +1,274 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Custom Notification Badge by Priyanka-Mohanty</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-dark.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/main.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
+    <section class="page-header">
+      <h1 class="project-name">Custom Notification Badge</h1>
+      <h2 class="project-tagline">#display notification count on Actionbar</h2>
+      <a href="https://github.com/Priyanka-Mohanty/CustomNotificationBadge" class="btn">View on GitHub</a>
+      <a href="https://github.com/Priyanka-Mohanty/CustomNotificationBadge/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/Priyanka-Mohanty/CustomNotificationBadge/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-      <header>
-        <h1>Custom Notification Badge</h1>
-        <p></p>
-      </header>
+    <section class="main-content">
+      <h3>
+<a id="custom-notification-badge" class="anchor" href="#custom-notification-badge" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Custom Notification Badge</h3>
 
-      <div id="banner">
-        <span id="logo"></span>
+<p>For Creating badge:</p>
 
-        <a href="https://github.com/Priyanka-Mohanty/CustomNotificationBadge" class="button fork"><strong>View On GitHub</strong></a>
-        <div class="downloads">
-          <span>Downloads:</span>
-          <ul>
-            <li><a href="https://github.com/Priyanka-Mohanty/CustomNotificationBadge/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/Priyanka-Mohanty/CustomNotificationBadge/tarball/master" class="button">TAR</a></li>
-          </ul>
-        </div>
-      </div><!-- end banner -->
+<p><strong>BadgeDrawable.java</strong></p>
 
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
-      <section>
-        <h3>
-<a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
-      </section>
-      <footer>
-        <p>Project maintained by <a href="https://github.com/Priyanka-Mohanty">Priyanka-Mohanty</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></small></p>
+<pre><code>`package com.example.priyankam.customnotificationbadge;
+
+ import android.content.Context;
+ import android.graphics.Canvas;
+ import android.graphics.Color;
+ import android.graphics.ColorFilter;
+ import android.graphics.Paint;
+ import android.graphics.Rect;
+ import android.graphics.Typeface;
+ import android.graphics.drawable.Drawable;
+
+public class BadgeDrawable extends Drawable {
+
+private float mTextSize;
+private Paint mBadgePaint;
+private Paint mTextPaint;
+private Rect mTxtRect = new Rect();
+
+private String mCount = "";
+private boolean mWillDraw = false;
+
+public BadgeDrawable(Context context) {
+    // mTextSize = 10dp;
+    mTextSize = context.getResources().getDimension(R.dimen.margin_ssmall);
+
+    mBadgePaint = new Paint();
+    mBadgePaint.setColor(Color.RED);
+    mBadgePaint.setAntiAlias(true);
+    mBadgePaint.setStyle(Paint.Style.FILL);
+
+    mTextPaint = new Paint();
+    mTextPaint.setColor(Color.WHITE);
+    mTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
+    mTextPaint.setTextSize(mTextSize);
+    mTextPaint.setAntiAlias(true);
+    mTextPaint.setTextAlign(Paint.Align.CENTER);
+}
+
+@Override
+public void draw(Canvas canvas) {
+    if (!mWillDraw) {
+        return;
+    }
+
+    Rect bounds = getBounds();
+    float width = bounds.right - bounds.left;
+    float height = bounds.bottom - bounds.top;
+
+    // Position the badge in the top-right quadrant of the icon.
+    float radius = ((Math.min(width, height) / 2) - 1) / (float) 1.6;
+    float centerX = width - radius - 1;
+    float centerY = radius + 1;
+
+    // Draw badge circle.
+    canvas.drawCircle(centerX, centerY, radius, mBadgePaint);
+
+    // Draw badge count text inside the circle.
+    mTextPaint.getTextBounds(mCount, 0, mCount.length(), mTxtRect);
+    float textHeight = mTxtRect.bottom - mTxtRect.top;
+    float textY = centerY + (textHeight / 2f);
+    canvas.drawText(mCount, centerX, textY, mTextPaint);
+}
+
+/*
+Sets the count (i.e notifications) to display.
+ */
+public void setCount(int count) {
+    mCount = Integer.toString(count);
+
+    // Only draw a badge if there are notifications.
+    mWillDraw = count &gt; 0;
+    invalidateSelf();
+}
+
+@Override
+public void setAlpha(int alpha) {
+    // do nothing
+}
+
+@Override
+public int getOpacity() {
+    // TODO Auto-generated method stub
+    return 0;
+}
+
+
+@Override
+public void setColorFilter(ColorFilter cf) {
+    // TODO Auto-generated method stub
+
+}
+}`
+</code></pre>
+
+<p><strong>menu.xml</strong></p>
+
+<pre><code>`&lt;?xml version="1.0" encoding="utf-8"?&gt;
+ &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"&gt;
+  &lt;item
+    android:id="@+id/action_cart"
+    android:icon="@drawable/ic_menu_notifications"
+    android:title="notification"
+    app:showAsAction="always" /&gt;
+&lt;/menu&gt;`
+</code></pre>
+
+<p>** In MainActivity.java added following code **</p>
+
+<pre><code>`@Override
+ public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.main, menu);
+    return super.onCreateOptionsMenu(menu);
+}
+
+@Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    int id = item.getItemId();
+
+    // Handle presses on the action bar items
+    switch (id) {
+        case R.id.action_cart:
+
+            GlobalClass.setAddToCart(context, item,numMessages);
+            invalidateOptionsMenu();
+
+            //This is the proper solution for Open Some Activity  after clicking the action in notification
+            // Open InfoActivity Class on "Info" Button Click
+            Intent intentInfo = new Intent(this, InfoActivity.class);
+            // Send data to InfoActivity Class
+            intentInfo.putExtra("title", strTitle);
+            intentInfo.putExtra("text", strText);
+            startActivity(intentInfo);
+
+            numMessages=0;//clear notification count
+            invalidateOptionsMenu();
+
+            return true;
+
+        default:
+            onBackPressed();
+            return true;
+    }
+
+}`
+</code></pre>
+
+<p>And also add the following code ,where you want to update the notification count:</p>
+
+<pre><code>`bcustomnotify.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            GlobalClass.setNotifyCount(numMessages);
+            // force the ActionBar to relayout its MenuItems.
+            // onCreateOptionsMenu(Menu) will be called again.
+            invalidateOptionsMenu();
+
+        }
+    });`
+</code></pre>
+
+<p>and also refresh the count onResume():</p>
+
+<pre><code>`@Override
+ protected void onResume() {
+    super.onResume();
+    // force the ActionBar to relayout its MenuItems.
+    // onCreateOptionsMenu(Menu) will be called again.
+    invalidateOptionsMenu();
+}`
+</code></pre>
+
+<p><strong>GlobalClass.java</strong></p>
+
+<pre><code>`package com.example.priyankam.customnotificationbadge;
+
+ import android.app.Activity;
+ import android.content.Context;
+ import android.graphics.drawable.LayerDrawable;
+ import android.view.MenuItem;
+
+ public class GlobalClass extends Activity {
+  private static LayerDrawable icon;
+  public GlobalClass() {
+    //constructor
+ }
+ public static void setAddToCart(Context context, MenuItem item, int numMessages) {
+    icon = (LayerDrawable) item.getIcon();
+    SetNotificationCount.setBadgeCount(context, icon,GlobalClass.setNotifyCount(numMessages));
+ }
+ public static int setNotifyCount(int numMessages) {
+    int count=numMessages;
+    return count;
+}
+}`
+</code></pre>
+
+<p><strong>SetNotificationCount.java</strong></p>
+
+<pre><code>`package com.example.priyankam.customnotificationbadge;
+
+ import android.content.Context;
+ import android.graphics.drawable.Drawable;
+ import android.graphics.drawable.LayerDrawable;
+
+ public class SetNotificationCount {
+ public static void setBadgeCount(Context context, LayerDrawable icon, int count) {
+    BadgeDrawable badge;
+    // Reuse drawable if possible
+    Drawable reuse = icon.findDrawableByLayerId(R.id.ic_badge);
+    if (reuse != null &amp;&amp; reuse instanceof BadgeDrawable) {
+        badge = (BadgeDrawable) reuse;
+    } else {
+        badge = new BadgeDrawable(context);
+    }
+    badge.setCount(count);
+    icon.mutate();
+    icon.setDrawableByLayerId(R.id.ic_badge, badge);
+}
+}`
+</code></pre>
+
+<h1>
+<a id="output" class="anchor" href="#output" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Output:</h1>
+
+<p><img src="https://raw.githubusercontent.com/Priyanka-Mohanty/CustomNotificationBadge/gh-pages/Images/Screenshot_20160803-151305.png" alt="First Screen">
+<img src="https://raw.githubusercontent.com/Priyanka-Mohanty/CustomNotificationBadge/gh-pages/Images/Screenshot_20160803-151309.png" alt="Second Screen">
+<img src="https://raw.githubusercontent.com/Priyanka-Mohanty/CustomNotificationBadge/gh-pages/Images/Screenshot_20160803-151313.png" alt="Third Screen">
+<img src="https://raw.githubusercontent.com/Priyanka-Mohanty/CustomNotificationBadge/gh-pages/Images/Screenshot_20160803-151335.png" alt="Fourth Screen">
+<img src="https://raw.githubusercontent.com/Priyanka-Mohanty/CustomNotificationBadge/gh-pages/Images/Screenshot_20160803-151403.png" alt="Fifth Screen"></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/Priyanka-Mohanty/CustomNotificationBadge">Custom Notification Badge</a> is maintained by <a href="https://github.com/Priyanka-Mohanty">Priyanka-Mohanty</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
+    </section>
+
+  
   </body>
 </html>
